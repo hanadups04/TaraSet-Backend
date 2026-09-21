@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import itemsRouter from "./routes/items.routes";
 import authRoutes from "./routes/auth.routes";
+import circleRouter from "./routes/circle.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import helmet from "helmet";
 import { issueCsrfToken } from "./middleware/csrf";
@@ -30,7 +31,8 @@ app.get("/api/csrf-token", issueCsrfToken, (req, res) => {
   res.json({ status: "ok"});
 });
 
-app.use("/api/circles", itemsRouter);
+app.use("/api/items", itemsRouter);
+app.use("/api/circles", circleRouter);
 app.use("/api/auth", authRoutes);
 
 // 404 for unmatched routes

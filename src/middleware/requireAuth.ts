@@ -12,7 +12,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   
   try {
     const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET!);
-    (req as any).userId = (payload as any).userId;
+    (req as any).user_id = (payload as any).user_id;
     next();
   } catch (error) {
     if (error instanceof TokenExpiredError) {
