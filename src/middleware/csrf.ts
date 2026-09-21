@@ -15,9 +15,9 @@ export function issueCsrfToken(req: Request, res: Response, next: NextFunction){
 
 export function verifyCsrfToken(req: Request, res: Response, next: NextFunction){
     const cookieToken = req.cookies?.csrfToken;
-    const heaaderToken = req.headers["x-csrf-token"];
+    const headerToken = req.headers["x-csrf-token"]; //from frontend
 
-    if (!cookieToken || !heaaderToken || cookieToken !== heaaderToken) {
+    if (!cookieToken || !headerToken || cookieToken !== headerToken) {
         return res.status(403).json({error: "CSRF token was invalid or missing"});
     }
     next();

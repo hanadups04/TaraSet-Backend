@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import helmet from "helmet";
 import { issueCsrfToken } from "./middleware/csrf";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -17,11 +18,16 @@ app.use(cors(
   }
 ));
 app.use(helmet());
-app.use(issueCsrfToken);
 app.use(express.json());
+app.use(cookieParser());
+app.use(issueCsrfToken);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get("/api/csrf-token", issueCsrfToken, (req, res) => {
+  res.json({ status: "ok"});
 });
 
 app.use("/api/circles", itemsRouter);

@@ -1,4 +1,4 @@
-import { pool } from '../config/db';
+import { pool } from "../config/db";
 
 export async function getAllCircles() {
     const result = await pool.query('SELECT * FROM circles_tbl ORDER BY created_at');
