@@ -8,7 +8,10 @@ const idParamsSchema = z.object({
 })
 
 const stringParamsSchema = z.object({
-  circle_name: z.string(),
+  circle_name: z.string()
+})
+
+const joinParamsSchema = z.object({
   circle_code: z.string()
 })
 
@@ -63,8 +66,9 @@ export const createCircleController = async (req: Request, res: Response) => {
 
   const parsed = stringParamsSchema.safeParse(req.body);
 
-  console.log(parsed.error?.issues);
+  
   if (!parsed.success) {
+    console.log(parsed.error?.issues);
     return res.status(400).json({
       error: "Invalid circle name"
     });
@@ -75,13 +79,7 @@ export const createCircleController = async (req: Request, res: Response) => {
   try {
     const createCircle = await createCircleService(circle_name, user_id);
 
-    console.log("circle_name", circle_name)
-
-    if (!circle_name) {
-      return res.status(404).json({
-        error: "Circle name is required"
-      })
-    }
+    console.log("circle_name", circle_name);
     res.status(200).json(createCircle);
   } catch (error) {
     res.status(500).json({
@@ -94,10 +92,10 @@ export const createCircleController = async (req: Request, res: Response) => {
 export const joinCircleController = async (req: Request, res: Response) => {
   const user_id = (req as any).user_id;
 
-  const parsed = stringParamsSchema.safeParse(req.body);
+  const parsed = joinParamsSchema.safeParse(req.body);
 
-  console.log(parsed.error?.issues);
   if (!parsed.success) {
+    console.log(parsed.error?.issues);
     return res.status(400).json({
       error: "Invalid code"
     });
@@ -107,8 +105,8 @@ export const joinCircleController = async (req: Request, res: Response) => {
   
   try {
     console.log("circle_code", circle_code);
-    // const joinCircle = await joinCircleService(circle_code, user_id);
-    // res.status(200).json(joinCircle);
+    const joinCircle = await joinCircleService(circle_code, user_id);
+    res.status(200).json(joinCircle);
   } catch (error) {
     res.status(500).json({
       code: error,
