@@ -7,7 +7,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!token) 
     return res.status(401).json({
       error: "Not authenticated", 
-      code: "NO_TOKEN" 
+      code: "NO_TOKEN"
     });
   
   try {
@@ -15,15 +15,18 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     (req as any).user_id = (payload as any).user_id;
     next();
   } catch (error) {
+    //expired ang token
     if (error instanceof TokenExpiredError) {
       res.status(401).json({ 
         error: "Token expired", 
         code: "TOKEN_EXPIRED" 
       });
     }
+
+    //Babalik sa login
     res.status(401).json({ 
-      error: "Token expired", 
-      code: "TOKEN_EXPIRED" 
+      error: "Token invalid", 
+      code: "INVALID_TOKEN" 
     });
   }
 }

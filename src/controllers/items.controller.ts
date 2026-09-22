@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { Item } from '../types';
-import { getACircleServices } from '../services/circle.service';
+import { getAllCircles } from '../services/items.service';
 
 let items: Item[] = [{ id: 1, name: 'Example' }];
 
 export const getCircle = async (req: Request, res: Response) => {
   try {
-    const circles = await getACircleServices("029d2161-4bc9-4f99-a8e0-e6067f4d20e7");
+    const circles = await getAllCircles();
     res.status(200).json(circles);
   } catch (error) {
     res.status(500).json({code: error, error: 'Failed to fetch circles'})
