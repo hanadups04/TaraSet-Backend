@@ -142,7 +142,6 @@ export async function joinCircleService(circle_code: string, user_id: string) {
     return result.rows[0];
 }
 
-
 // const client = await pool.connect();
 
 //     try {
