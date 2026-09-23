@@ -7,18 +7,23 @@ import { getCirclesServiceAll,
           getItineraryService } from '../services/circle.service';
 import { z } from "zod";
 
+//PURPOSE: ZOD validation for get All circles
 const idParamsSchema = z.object({
   circle_id: z.uuid(),
 })
 
+
+//PURPOSE: ZOD validation for creating circle
 const stringParamsSchema = z.object({
   circle_name: z.string(),
 })
 
+//PURPOSE: ZOD validation for joining circle
 const joinParamsSchema = z.object({
   circle_code: z.string(),
 })
 
+//PURPOSE: ZOD validation for get itinerary tbl
 const getItineraryParamsSchema = z.object({
   circle_id: z.uuid(),
 })
@@ -136,7 +141,9 @@ export const getItineraryController = async (req: Request, res: Response) => {
   const { circle_id } = parsed.data;
 
   try {
+
     console.log("circle_code", circle_id);
+
     const getItinerary = await getItineraryService(circle_id);
     res.status(200).json(getItinerary);
   } catch (error) {

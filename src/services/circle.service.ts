@@ -143,7 +143,7 @@ export async function joinCircleService(circle_code: string, user_id: string) {
 }
 
 export async function getItineraryService(circle_id: string) {
-    console.log("djhjd", circle_id);
+
     const result = await pool.query(
         `SELECT 
             itinerary_id,
