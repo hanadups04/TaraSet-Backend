@@ -142,6 +142,25 @@ export async function joinCircleService(circle_code: string, user_id: string) {
     return result.rows[0];
 }
 
+export async function getItineraryService(circle_id: string) {
+    console.log("djhjd", circle_id);
+    const result = await pool.query(
+        `SELECT 
+            itinerary_id,
+            circle_id, 
+            name, 
+            location,
+            start_date, 
+            end_date,
+            notes
+        FROM itinerary_tbl
+        WHERE circle_id = $1`,
+
+        [circle_id],
+    );
+    return result.rows;
+}
+
 // const client = await pool.connect();
 
 //     try {
