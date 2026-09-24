@@ -6,7 +6,10 @@ import { getCirclesServiceAll,
           joinCircleService,
           getItineraryService,
           addDateService,
-          addItineraryService } from '../services/circle.service';
+          addItineraryService,
+          deleteCircleService,
+          deleteItineraryService,
+          deleteDateService } from '../services/circle.service';
 import { z } from "zod";
 import { error } from 'console';
 
@@ -14,7 +17,6 @@ import { error } from 'console';
 const idParamsSchema = z.object({
   circle_id: z.uuid(),
 })
-
 
 //PURPOSE: ZOD validation for creating circle
 const stringParamsSchema = z.object({
@@ -45,6 +47,21 @@ const addItineraryParamsSchema = z.object({
   start_date: z.string(), 
   end_date: z.string(),
   notes: z.string(),
+})
+
+//PURPOSE: ZOD validation for deleting circle
+const delCircleParamsSchema = z.object({
+  circle_id: z.uuid(),
+})
+
+//PURPOSE: ZOD validation for deleting itinerary
+const delItineraryParamsSchema = z.object({
+  itinerary_id: z.uuid(),
+})
+
+//PURPOSE: ZOD validation for deleting available date
+const delDateParamsSchema = z.object({
+  date_id: z.uuid(),
 })
 
 export const getCircleControllerAll = async (req: Request, res: Response) => {
@@ -225,6 +242,78 @@ export const addItineraryController = async (req: Request, res: Response) => {
     res.status(500).json({
       code: error,
       error: "Failed to add itinerary"
+    });
+  }
+}
+
+export const deleteCircleController = async (req: Request, res: Response) => {
+  const parsed = delCircleParamsSchema.safeParse(req.body);
+
+  if(!parsed.success){
+    console.log(parsed.error.issues);
+    return res.status(404).json({
+      error: "Invalid Circle id"
+    });
+  }
+
+  const { circle_id } = parsed.data;
+
+  try {
+    console.log("del circle id", circle_id);
+    const delCircle = await deleteCircleService(circle_id);
+    res.status(200).json(delCircle);
+  } catch (error) {
+    res.status(500).json({
+      code: error,
+      error: "Failed to delete circle"
+    });
+  }
+}
+
+export const deleteItineraryContoller = async(req: Request, res: Response) => {
+  const parsed = delItineraryParamsSchema.safeParse(req.body);
+
+  if(!parsed.success){
+    console.log(parsed.error.issues);
+    return res.status(400).json({
+      error: "Invalid itinerary id"
+    });
+  }
+
+  const { itinerary_id } = parsed.data;
+
+  try {
+    console.log("itinerary id", itinerary_id);
+    const delItinerary = await deleteItineraryService(itinerary_id);
+    res.status(200).json(delItinerary);
+  } catch (error) {
+    res.status(500).json({
+      code: error,
+      error: "Failed to delete itinerary"
+    });
+  }
+}
+
+export const deleteDateController = async(req: Request, res: Response) => {
+  const parsed = delDateParamsSchema.safeParse(req.body);
+
+  if(!parsed.success){
+    console.log(parsed.error.issues);
+    return res.status(400).json({
+      error: "Invalid date id"
+    });
+  }
+
+  const { date_id } = parsed.data;
+
+  try {
+    console.log("date id", date_id);
+    const delDate = await deleteDateService(date_id);
+    res.status(200).json(delDate);
+  } catch (error) {
+    res.status(500).json({
+      code: error,
+      error: "Failed to delete date"
     });
   }
 }

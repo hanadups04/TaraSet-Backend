@@ -200,6 +200,38 @@ export async function addItineraryService(
     return result.rows[0];
 }
 
+export async function deleteCircleService(circle_id: string){
+    const result = await pool.query(
+        `DELETE FROM circles_tbl
+        WHERE circle_id = $1`,
+
+        [circle_id]
+    );
+
+    return result.rows[0];
+}
+
+export async function deleteItineraryService(itinerary_id:  string) {
+    const result = await pool.query(
+        `DELETE FROM itinerary_tbl
+        WHERE itinerary_id = $1`,
+
+        [itinerary_id]
+    );
+    
+    return result.rows[0];
+}
+
+export async function deleteDateService(date_id: string) {
+    const result = await pool.query(
+        `DELETE FROM circle_dates_tbl
+        WHERE circle_id = $1`,
+
+        [date_id]
+    );
+
+    return result.rows[0];
+}
 // const client = await pool.connect();
 
 //     try {
