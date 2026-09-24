@@ -4,8 +4,11 @@ import { getCirclesServiceAll,
           getCircleServiceSingle, 
           createCircleService, 
           joinCircleService,
-          getItineraryService } from '../services/circle.service';
+          getItineraryService,
+          addDateService,
+          addItineraryService } from '../services/circle.service';
 import { z } from "zod";
+import { error } from 'console';
 
 //PURPOSE: ZOD validation for get All circles
 const idParamsSchema = z.object({
@@ -26,6 +29,22 @@ const joinParamsSchema = z.object({
 //PURPOSE: ZOD validation for get itinerary tbl
 const getItineraryParamsSchema = z.object({
   circle_id: z.uuid(),
+})
+
+//PURPOSE: ZOD validation for  circle_id in add available date
+const addAvailableDateParamsSchema = z.object({
+  circle_id: z.uuid(),
+  date_available: z.string(),
+})
+
+//PURPOSE: ZOD validation for  add itinerary
+const addItineraryParamsSchema = z.object({
+  circle_id: z.uuid(),
+  name: z.string(), 
+  location: z.string(),
+  start_date: z.string(), 
+  end_date: z.string(),
+  notes: z.string(),
 })
 
 export const getCircleControllerAll = async (req: Request, res: Response) => {
@@ -153,4 +172,61 @@ export const getItineraryController = async (req: Request, res: Response) => {
     });
   } 
 }
+
+export const addDateController = async(req: Request, res: Response) => {
+  const user_id = (req as any).user_id;
+
+  const parsed = addAvailableDateParamsSchema.safeParse(req.body);
+
+  if(!parsed.success){
+    console.log(parsed.error.issues);
+    return res.status(400).json({
+      error: "wrongggg"
+    });
+  }
+
+  const { circle_id, date_available} = parsed.data;
+
+  try {
+    console.log("date", circle_id, user_id, date_available);
+    const addDate = await addDateService(circle_id, user_id, date_available);
+    res.status(200).json(addDate);
+  } catch (error) {
+    res.status(500).json({
+      code: error,
+      error: "Failed to add available date"
+    });
+  }
+}
+
+export const addItineraryController = async (req: Request, res: Response) => {
+  const parsed = addItineraryParamsSchema.safeParse(req.body);
+
+  if(!parsed.success){
+    console.log(parsed.error.issues);
+    return res.status(404).json({
+      error: "Fields are incorrect"
+    });
+  }
+
+  const {
+    circle_id, 
+    name, 
+    location, 
+    start_date, 
+    end_date, 
+    notes } = parsed.data;
+
+  try {
+    console.log("add itinerary data", circle_id, name, location, start_date, end_date, notes);
+    const addItinerary = await addItineraryService(circle_id, name, location, start_date, end_date, notes);
+    res.status(200).json(addItinerary);
+  } catch (error) {
+    res.status(500).json({
+      code: error,
+      error: "Failed to add itinerary"
+    });
+  }
+}
+
 

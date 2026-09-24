@@ -5,7 +5,9 @@ import {
     getCircleControllerSingle, 
     createCircleController, 
     joinCircleController,
-    getItineraryController } 
+    getItineraryController,
+    addDateController,
+    addItineraryController } 
     from '../controllers/circle.controller';
 import { verifyCsrfToken } from "../middleware/csrf";
 
@@ -16,5 +18,7 @@ router.get("/:circle_id", requireAuth, getCircleControllerSingle);
 router.post("/createCircle", requireAuth, verifyCsrfToken, createCircleController);
 router.post("/joinCircle", requireAuth, verifyCsrfToken, joinCircleController);
 router.get("/itinerary/:circle_id", requireAuth, getItineraryController);
+router.post("/dateAvailable", requireAuth, addDateController);
+router.post("/addItinerary", requireAuth, addItineraryController)
 
 export default router;

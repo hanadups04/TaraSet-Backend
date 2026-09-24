@@ -161,6 +161,45 @@ export async function getItineraryService(circle_id: string) {
     return result.rows;
 }
 
+export async function addDateService(circle_id: string, user_id: string, date_available: string) {
+    console.log("dateee", circle_id, user_id, date_available);
+    const result = await pool.query(
+        `INSERT INTO 
+            circle_dates_tbl (circle_id, user_id, date_available)
+        VALUES ($1, $2, $3)`,
+
+        [circle_id, user_id, date_available]
+    );
+
+    return result.rows[0];
+}
+
+export async function addItineraryService(
+    circle_id: string, 
+    name: string, 
+    location: string, 
+    start_date: string, 
+    end_date: string,
+    notes: string) {
+
+    console.log("add itinerary datas", circle_id, name, location, start_date, end_date, notes);
+    const result = await pool.query(
+        `INSERT INTO 
+            itinerary_tbl (
+            circle_id, 
+            name, 
+            location,
+            start_date,
+            end_date,
+            notes )
+        VALUES ($1, $2, $3, $4, $5, $6)`,
+
+        [circle_id, name, location, start_date, end_date, notes]
+    );
+
+    return result.rows[0];
+}
+
 // const client = await pool.connect();
 
 //     try {
