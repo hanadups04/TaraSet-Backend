@@ -65,7 +65,7 @@ export async function getCircleServiceSingle(user_id: string, circle_id: string)
     return result.rows[0];
 }
 
-export async function createCircleService(circle_name: string, user_id: string) {
+export async function postCircleService(circle_name: string, user_id: string) {
 
     function generateCircleCode(length = 6): string {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -126,7 +126,7 @@ export async function validateCodeService(circle_code: string) {
     return result.rows[0];
 }
 
-export async function joinCircleService(circle_code: string, user_id: string) {
+export async function postJoinCircleService(circle_code: string, user_id: string) {
 
     const circleCode = await validateCodeService(circle_code);
     const circle_id = circleCode.circle_id;
@@ -161,7 +161,7 @@ export async function getItineraryService(circle_id: string) {
     return result.rows;
 }
 
-export async function addDateService(circle_id: string, user_id: string, date_available: string) {
+export async function postDateService(circle_id: string, user_id: string, date_available: string) {
     console.log("dateee", circle_id, user_id, date_available);
     const result = await pool.query(
         `INSERT INTO 
@@ -174,7 +174,7 @@ export async function addDateService(circle_id: string, user_id: string, date_av
     return result.rows[0];
 }
 
-export async function addItineraryService(
+export async function postItineraryService(
     circle_id: string, 
     name: string, 
     location: string, 

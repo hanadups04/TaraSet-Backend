@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import { requireAuth } from '../middleware/requireAuth';
 import { getCirclesServiceAll, 
           getCircleServiceSingle, 
-          createCircleService, 
-          joinCircleService,
+          postCircleService, 
+          postJoinCircleService,
           getItineraryService,
-          addDateService,
-          addItineraryService,
+          postDateService,
+          postItineraryService,
           deleteCircleService,
           deleteItineraryService,
           deleteDateService } from '../services/circle.service';
@@ -110,7 +110,7 @@ export const getCircleControllerSingle = async (req: Request, res: Response) => 
   }
 };
 
-export const createCircleController = async (req: Request, res: Response) => {
+export const postCircleController = async (req: Request, res: Response) => {
   const user_id = (req as any).user_id;
 
   const parsed = stringParamsSchema.safeParse(req.body);
@@ -126,7 +126,7 @@ export const createCircleController = async (req: Request, res: Response) => {
   const { circle_name } = parsed.data;
 
   try {
-    const createCircle = await createCircleService(circle_name, user_id);
+    const createCircle = await postCircleService(circle_name, user_id);
 
     console.log("circle_name", circle_name);
     res.status(200).json(createCircle);
@@ -138,7 +138,7 @@ export const createCircleController = async (req: Request, res: Response) => {
   }
 }
 
-export const joinCircleController = async (req: Request, res: Response) => {
+export const postJoinCircleController = async (req: Request, res: Response) => {
   const user_id = (req as any).user_id;
 
   const parsed = joinParamsSchema.safeParse(req.body);
@@ -154,7 +154,7 @@ export const joinCircleController = async (req: Request, res: Response) => {
   
   try {
     console.log("circle_code", circle_code);
-    const joinCircle = await joinCircleService(circle_code, user_id);
+    const joinCircle = await postJoinCircleService(circle_code, user_id);
     res.status(200).json(joinCircle);
   } catch (error) {
     res.status(500).json({
@@ -190,7 +190,7 @@ export const getItineraryController = async (req: Request, res: Response) => {
   } 
 }
 
-export const addDateController = async(req: Request, res: Response) => {
+export const postDateController = async(req: Request, res: Response) => {
   const user_id = (req as any).user_id;
 
   const parsed = addAvailableDateParamsSchema.safeParse(req.body);
@@ -206,7 +206,7 @@ export const addDateController = async(req: Request, res: Response) => {
 
   try {
     console.log("date", circle_id, user_id, date_available);
-    const addDate = await addDateService(circle_id, user_id, date_available);
+    const addDate = await postDateService(circle_id, user_id, date_available);
     res.status(200).json(addDate);
   } catch (error) {
     res.status(500).json({
@@ -216,7 +216,7 @@ export const addDateController = async(req: Request, res: Response) => {
   }
 }
 
-export const addItineraryController = async (req: Request, res: Response) => {
+export const postItineraryController = async (req: Request, res: Response) => {
   const parsed = addItineraryParamsSchema.safeParse(req.body);
 
   if(!parsed.success){
@@ -236,7 +236,7 @@ export const addItineraryController = async (req: Request, res: Response) => {
 
   try {
     console.log("add itinerary data", circle_id, name, location, start_date, end_date, notes);
-    const addItinerary = await addItineraryService(circle_id, name, location, start_date, end_date, notes);
+    const addItinerary = await postItineraryService(circle_id, name, location, start_date, end_date, notes);
     res.status(200).json(addItinerary);
   } catch (error) {
     res.status(500).json({
