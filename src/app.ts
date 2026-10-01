@@ -13,22 +13,23 @@ dotenv.config();
 
 const app: Application = express();
 
-app.use(cors(
-  {
-    origin: "http://localhost:3000"
-  }
-));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 app.use(issueCsrfToken);
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: "ok" });
 });
 
 app.get("/api/csrf-token", issueCsrfToken, (req, res) => {
-  res.json({ status: "ok"});
+  res.json({ status: "ok" });
 });
 
 app.use("/api/items", itemsRouter);
