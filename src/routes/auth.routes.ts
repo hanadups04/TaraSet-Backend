@@ -4,8 +4,10 @@ import {
   login,
   logout,
   refresh,
+  getCurrentUserId,
 } from "../controllers/auth.controller";
 import { rateLimit } from "express-rate-limit";
+import { requireAuth } from "../middleware/requireAuth";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -29,5 +31,6 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/refresh", refreshLimiter, refresh);
 router.post("/logout", logout);
+router.get("/id", requireAuth, getCurrentUserId);
 
 export default router;

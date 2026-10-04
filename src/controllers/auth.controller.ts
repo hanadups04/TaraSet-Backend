@@ -1,43 +1,57 @@
-import { Request, Response } from 'express';
-import { registerUser, verifyUser } from '../services/auth.service';
-import { generateTokens } from '../services/token.service';
-import { pool } from '../config/db';
-import jwt from 'jsonwebtoken';
+import { Request, Response } from "express";
+import { registerUser, verifyUser } from "../services/auth.service";
+import { generateTokens } from "../services/token.service";
+import { pool } from "../config/db";
+import jwt from "jsonwebtoken";
+import { error } from "node:console";
 
 export const register = async (req: Request, res: Response) => {
   const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'email and password are required' });
+    return res.status(400).json({ error: "email and password are required" });
   }
 
   try {
     const user = await registerUser(email, password);
     res.status(201).json({ id: user.id, email: user.email });
   } catch (error) {
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ error: "Registration failed" });
     console.log(error);
   }
 };
 
 export const login = async (req: Request, res: Response) => {
-
   const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'email and password are required' });
+    return res.status(400).json({ error: "email and password are required" });
   }
 
   try {
     const user = await verifyUser(email, password);
 
-    if (!user) return res.status(401).json({ error: 'Invalid email or password' });
+    if (!user)
+      return res.status(401).json({ error: "Invalid email or password" });
 
     const { accessToken, refreshToken } = generateTokens(user.id);
-    await pool.query('INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)', [user.id, refreshToken]);
+    await pool.query(
+      "INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)",
+      [user.id, refreshToken],
+    );
 
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000, sameSite: "strict", secure: process.env.NODE_ENV === "production" });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "strict" , secure: process.env.NODE_ENV === "production" });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
     res.json({ id: user.id, email: user.email });
     console.log("token", accessToken, refreshToken);
   } catch (error) {
@@ -48,43 +62,82 @@ export const login = async (req: Request, res: Response) => {
 
 export const refresh = async (req: Request, res: Response) => {
   const oldRefreshToken = req.cookies?.refreshToken;
-  if (!oldRefreshToken) return res.status(401).json({ error: 'No refresh token' });
+  if (!oldRefreshToken) {
+    return res.status(401).json({ error: "No refresh token" });
+  }
 
   try {
-    const payload = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET!) as { userId: string };
+    const payload = jwt.verify(
+      oldRefreshToken,
+      process.env.JWT_REFRESH_SECRET!,
+    ) as { user_id: string }; // wala nakuhang id since wrong format userId - payload = "" / undefined
 
     const stored = await pool.query(
-      'SELECT * FROM refresh_tokens WHERE token = $1 AND revoked = false',
-      [oldRefreshToken]
-    );
+      "SELECT * FROM refresh_tokens WHERE token = $1 AND revoked = false",
+      [oldRefreshToken],
+    ); // token - jhbjhjh AND revoked = false may makikita dito pag fresh login
     if (stored.rows.length === 0) {
-      return res.status(401).json({ error: 'Refresh token invalid or reused' });
-    }
+      return res.status(401).json({ error: "Refresh token invalid or reused" });
+    } // dipa mattriger agad
 
     // Rotate: kill the old one, issue a new pair
-    await pool.query('UPDATE refresh_tokens SET revoked = true WHERE token = $1', [oldRefreshToken]);
-    const { accessToken, refreshToken } = generateTokens(payload.userId);
-    await pool.query('INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)', [payload.userId, refreshToken]);
+    await pool.query(
+      "UPDATE refresh_tokens SET revoked = true WHERE token = $1",
+      [oldRefreshToken],
+    ); //update is executed to revoked = true. sa case mo, nagtrue yung preious mo
+    //pero ning tinry na maggenerate ng new, naggenerate na, pero nung iinsert na sa
+    //refresh token table, blank yung user id, kaya nagnulk sa insert,
+    //then kaya nagrrekta sa catch statement.
+    //kapag nag refresh ulit error na, invalid or reused na lalabas
 
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000, sameSite: "strict", secure: process.env.NODE_ENV === "production" });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "strict", secure: process.env.NODE_ENV === "production" });
-    res.json({ status: 'refreshed' });
-  } catch {
-    res.status(401).json({ error: 'Invalid refresh token' });
+    const { accessToken, refreshToken } = generateTokens(payload.user_id);
+
+    await pool.query(
+      "INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)",
+      [payload.user_id, refreshToken],
+    ); //insert newly generated token
+
+    //set sa browser
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+    res.json({ status: "refreshed" });
+  } catch (error) {
+    res.status(401).json({ error: "Invalid refresh token", boger: error });
   }
 };
 
 export const logout = async (req: Request, res: Response) => {
   const refreshToken = req.cookies?.refreshToken;
   if (refreshToken) {
-    await pool.query('UPDATE refresh_tokens SET revoked = true WHERE token = $1', [refreshToken]);
+    await pool.query(
+      "UPDATE refresh_tokens SET revoked = true WHERE token = $1",
+      [refreshToken],
+    );
   }
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
-  res.json({ status: 'logged out' });
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  res.json({ status: "logged out" });
 };
 
+export const getCurrentUserId = async (req: Request, res: Response) => {
+  const user_id = (req as any).user_id;
 
+  res.status(200).json({
+    User: {
+      id: user_id,
+    },
+  });
+};
 
 // [
 //     {
