@@ -87,7 +87,7 @@ export async function postCircleService(circle_name: string, user_id: string) {
       `INSERT INTO 
                 circles_tbl ( circle_name, circle_code, total_members, owner_id )
             VALUES ( $1, $2, $3, $4 )
-            RETURNING circle_id`,
+            RETURNING circle_id, circle_name`,
 
       [circle_name, circle_code, "1", user_id],
     );
@@ -104,13 +104,7 @@ export async function postCircleService(circle_name: string, user_id: string) {
 
     await client.query("COMMIT");
 
-    console.log("new circle", {
-      circle_id: newCircleId,
-      circle_name,
-      circle_code,
-      total_members: 1,
-      owner_id: user_id,
-    });
+    return createCircleResult.rows[0];
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
